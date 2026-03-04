@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kubernetes Time App</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 40px; }
+      #time { font-size: 24px; font-weight: bold; }
+    </style>
+  </head>
+  <body>
+    <h1>현재 시간</h1>
+    <div id="time">로딩 중...</div>
+
+    <script>
+      async function loadTime() {
+        try {
+          const res = await fetch('/api/time');
+          const data = await res.json();
+          document.getElementById('time').textContent = data.iso;
+        } catch (err) {
+          document.getElementById('time').textContent = '로드 실패';
+        }
+      }
+      loadTime();
+    </script>
+  </body>
+</html>

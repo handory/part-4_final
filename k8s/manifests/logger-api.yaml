@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logger-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logger-api
+  template:
+    metadata:
+      labels:
+        app: logger-api
+    spec:
+      containers:
+        - name: logger-api
+          image: logger-api:1.0
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logger-api
+spec:
+  selector:
+    app: logger-api
+  ports:
+    - port: 8000
+      targetPort: 8000

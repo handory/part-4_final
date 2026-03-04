@@ -1,0 +1,36 @@
+services:
+  # 1) 정적 웹 프론트엔드 (Nginx)
+  # - 브라우저는 http://localhost:8080 로 접속
+  # - /api/* 요청은 내부 API 컨테이너로 프록시됨
+  web:
+    image: nginx:alpine            # 가벼운 Nginx 이미지 사용
+    ports:
+      - "8080:80"                  # 호스트 8080 → 컨테이너 80
+    volumes:
+      - ./web:/usr/share/nginx/html:ro                 # 정적 파일(HTML/CSS/JS)
+      - ./web/nginx.conf:/etc/nginx/conf.d/default.conf:ro  # 프록시 설정
+    depends_on:
+      - api                         # API가 먼저 떠야 웹이 정상 동작
+
+  # 2) 간단한 API (FastAPI)
+  # - DB에서 rows를 읽어 JSON으로 반환
+  # - web 컨테이너는 http://api:8000 로 통신
+  api:
+    build: ./api                   # ./api/Dockerfile 빌드
+    environment:
+      DATABASE_URL: postgresql://app:app@db:5432/appdb  # 서비스명 db로 접속
+    ports:
+      - "8000:8000"                # (선택) 호스트에서 직접 API 확인
+    depends_on:
+      - db                          # DB가 먼저 떠야 API가 연결 가능
+
+  # 3) 데이터베이스 (PostgreSQL)
+  # - init.sql로 샘플 테이블/데이터 자동 생성
+  db:
+    image: postgres:16-alpine      # 가벼운 Postgres 이미지
+    environment:
+      POSTGRES_USER: app           # DB 사용자
+      POSTGRES_PASSWORD: app       # DB 비밀번호
+      POSTGRES_DB: appdb           # 기본 DB 이름
+    # volumes:
+      # - db_data:/var/lib/postgresql/data             # (수업용) 데이터 영속화가 필요 없으면
